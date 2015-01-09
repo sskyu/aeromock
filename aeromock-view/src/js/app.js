@@ -2,11 +2,12 @@
 
 (function () {
     var React = require('react');
+    var App = require('./components/App.jsx');
 
     window.React = React;
 
     React.renderComponent(
-        <div>Hello</div>,
+        <App />,
         document.getElementById('app')
     );
 })();

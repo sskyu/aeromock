@@ -28,6 +28,9 @@ module.exports = {
     },
     resolve: {
       extensions: ['', '.js', '.jsx']
+    },
+    external: {
+      React: 'react'
     }
   },
 
