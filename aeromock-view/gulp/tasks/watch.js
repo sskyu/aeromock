@@ -8,4 +8,6 @@ gulp.task('watch', function () {
     gulp.watch(config.stylus.src, ['stylus']);
     // www
     gulp.watch(config.copy.src, ['copy']);
+    // webserver
+    gulp.start('webserver');
 });

@@ -6,7 +6,7 @@ var assign = require('object-assign');
 var Promise = require('es6-promise').Promise;
 
 var CHANGE_EVENT = 'change';
-var API_FETCH = 'http://localhost:3183/api/contexts';
+var API_FETCH = '/api/contexts';
 
 var _contexts = [];
 
@@ -22,7 +22,7 @@ function init() {
             },
             error: function (xhr) {
                 _contexts = [];
-                rejext(xhr);
+                reject(xhr);
             }
         });
     });

@@ -49,5 +49,18 @@ module.exports = {
       src + '/www/**'
     ],
     dest: dest
+  },
+
+  webserver: {
+    src: dest,
+    host: 'localhost',
+    port: 9000,
+    livereload: true,
+    proxies: [
+      {
+        source: '/api',
+        target: 'http://localhost:3183/api'
+      }
+    ]
   }
 };
