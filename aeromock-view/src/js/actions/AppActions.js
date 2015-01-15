@@ -3,9 +3,9 @@ var AppConstants = require('../constants/AppConstants');
 
 var AppActions = {
 
-    initialize: function () {
+    fetch: function () {
         AppDispatcher.dispatch({
-            actionType: AppConstants.APP_INIT
+            actionType: AppConstants.FETCH
         });
     }
 

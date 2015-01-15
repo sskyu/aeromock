@@ -1,31 +1,33 @@
-var AppDispatcher = require('../dispatcher/AppDispatcher');
-var EventEmitter = require('events').EventEmitter;
-var Constants = require('../constants/AppConstants');
 var $ = require('jquery');
-var assign = require('object-assign');
 var Promise = require('es6-promise').Promise;
+var EventEmitter = require('events').EventEmitter;
+var assign = require('object-assign');
+var AppDispatcher = require('../dispatcher/AppDispatcher');
+var AppConstants = require('../constants/AppConstants');
 
 var CHANGE_EVENT = 'change';
 var API_FETCH = '/api/contexts';
 
 var _contexts = [];
 
-function init() {
+function fetchContexts() {
     return new Promise(function (resolve, reject) {
         $.ajax({
             url: API_FETCH,
             type: 'get',
             success: function (resp) {
                 console.log(resp);
-                _contexts = resp.contexts;
                 resolve(resp);
             },
             error: function (xhr) {
-                _contexts = [];
                 reject(xhr);
             }
         });
     });
+}
+
+function xhrErrorHandler(xhr) {
+    console.log('onError:', xhr);
 }
 
 var AppStore = assign({}, EventEmitter.prototype, {
@@ -55,15 +57,12 @@ var AppStore = assign({}, EventEmitter.prototype, {
 });
 
 AppDispatcher.register(function (action) {
-
     switch (action.actionType) {
-        case Constants.APP_INIT:
-            init().then(function (resp) {
+        case AppConstants.FETCH:
+            fetchContexts().then(function (resp) {
+                _contexts = resp.contexts;
                 AppStore.emitChange();
-            }).catch(function (xhr) {
-                conosle.log(xhr);
-                AppStore.emitChange();
-            });
+            }, xhrErrorHandler);
             break;
     }
 
