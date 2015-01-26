@@ -1,0 +1,9 @@
+messagepack:
+  root: ./data
+  mode: json
+
+static:
+  root: ../static
+
+ajax:
+  root: ../json/ajax

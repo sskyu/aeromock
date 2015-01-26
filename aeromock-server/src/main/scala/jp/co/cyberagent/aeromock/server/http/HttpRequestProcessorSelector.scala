@@ -1,6 +1,6 @@
 package jp.co.cyberagent.aeromock.server.http
 
-import io.netty.handler.codec.http.HttpRequest
+import io.netty.handler.codec.http.FullHttpRequest
 import jp.co.cyberagent.aeromock.AeromockConfigurationException
 import jp.co.cyberagent.aeromock.config.Project
 import jp.co.cyberagent.aeromock.helper._
@@ -12,7 +12,7 @@ import Scalaz._
 
 object HttpRequestProcessorSelector extends AnyRef with Injectable {
 
-  def select(request: HttpRequest)(implicit inj: Injector): HttpRequestProcessor = {
+  def select(request: FullHttpRequest)(implicit inj: Injector): HttpRequestProcessor = {
 
     request.requestUri match {
       // Aeromockのfavicon
@@ -52,20 +52,27 @@ object HttpRequestProcessorSelector extends AnyRef with Injectable {
           case _ => None
         }
 
+        val messagepackInfo = project.messagepack match {
+          case Success(Some(value)) => if (value.root.exists) inject[MessagepackResponseWriter].some else None
+          case Failure(errors) => throw new AeromockConfigurationException(project.projectConfig, errors)
+          case _ => None
+        }
+
         val templateInfo = project.template match {
           case Success(Some(value)) => {
             val templateService = inject[Option[TemplateService]].get
-            if ((value.root / url + templateService.extension).exists) Some(inject[TemplateHttpRequestProcessor]) else None
+            if ((value.root / url + templateService.extension).exists) inject[TemplateHttpRequestProcessor].some else None
           }
           case Failure(errors) => throw new AeromockConfigurationException(project.projectConfig, errors)
           case _ => None
         }
 
-        (staticInfo, protobufInfo, templateInfo) match {
-          case (_, _, Some(value)) => value
-          case (_, Some(value), _) => value
-          case (Some(value), _, _) => value
-          case (None, None, None) => inject[JsonApiHttpRequestProcessor]
+        (staticInfo, protobufInfo, messagepackInfo, templateInfo) match {
+          case (_, _, _, Some(value)) => value
+          case (_, _, Some(value), _) => value
+          case (_, Some(value), _, _) => value
+          case (Some(value), _, _, _) => value
+          case (None, None, None, None) => inject[JsonApiHttpRequestProcessor]
         }
       }
     }
