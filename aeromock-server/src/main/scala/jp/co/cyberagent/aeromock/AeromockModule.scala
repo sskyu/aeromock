@@ -87,16 +87,17 @@ trait AeromockModule extends Module {
   bind [JsonApiHttpRequestProcessor] toProvider new JsonApiHttpRequestProcessor
   bind [UserStaticFileHttpRequestProcessor] toProvider new UserStaticFileHttpRequestProcessor
   bind [ProtobufResponseWriter] toProvider new ProtobufResponseWriter
+  bind [MessagepackResponseWriter] toProvider new MessagepackResponseWriter
 
   // controllers
-  bind [TestController] toProvider new TestController
   bind [ContextController] toProvider new ContextController
-  bind [DirectoryController] toProvider new DirectoryController
+  bind [ListController] toProvider new ListController
+  bind [AddDataController] toProvider new AddDataController
 
   binding identifiedBy 'controllers to Seq(
-    inject[TestController],
     inject[ContextController],
-    inject[DirectoryController]
+    inject[ListController],
+    inject[AddDataController]
   )
   bind [ApiResolver] toProvider new ApiResolver
 }

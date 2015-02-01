@@ -1,0 +1,9 @@
+messagepack:
+  root: ./data
+  mode: compact
+
+static:
+  root: ../static
+
+ajax:
+  root: ../json/ajax

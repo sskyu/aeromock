@@ -3,7 +3,6 @@ package jp.co.cyberagent.aeromock.config.definition
 import java.nio.file.Path
 
 import jp.co.cyberagent.aeromock.config
-import jp.co.cyberagent.aeromock.config.Tag
 import jp.co.cyberagent.aeromock.config._
 import jp.co.cyberagent.aeromock.template.TemplateContexts._
 import jp.co.cyberagent.aeromock.template.TemplateService
@@ -30,6 +29,7 @@ class ProjectDef extends AnyRef with Injectable {
   @BeanProperty var naming: NamingDef = null
   @BeanProperty var test: TestDef = null
   @BeanProperty var protobuf: ProtoBufDef = null
+  @BeanProperty var messagepack: MessagepackDef = null
 
   def toValue(projectConfig: Path)(implicit inj: Injector): Project = {
     val projectRoot = projectConfig.getParent
@@ -79,6 +79,11 @@ class ProjectDef extends AnyRef with Injectable {
       case None => none[ProtoBuf].successNel[String]
     }
 
+    val messagepackVal = Option(messagepack) match {
+      case Some(value) => messagepack.toValue(projectRoot)
+      case None => none[Messagepack].successNel[String]
+    }
+
     Project(
       projectConfig,
       projectRoot,
@@ -90,7 +95,8 @@ class ProjectDef extends AnyRef with Injectable {
       functionVal,
       namingVal,
       testVal,
-      protobufVal)
+      protobufVal,
+      messagepackVal)
 
   }
 }
@@ -280,6 +286,7 @@ class StaticDef {
 class AjaxDef {
   // ajax -> root
   @BeanProperty var root: String = null
+  @BeanProperty var jsonp_callback_name: String = null
 
   def toValue(projectRoot: Path): ValidationNel[String, Option[Ajax]] = {
 
@@ -299,9 +306,12 @@ class AjaxDef {
       }
     }
 
-    for {
-      ajaxRoot <- rootResult
-    } yield (Ajax(ajaxRoot).some)
+    val jsonpCallbackNameResult = Option(jsonp_callback_name) match {
+      case None => none[String].successNel
+      case Some(s) => s.some.successNel
+    }
+
+    (rootResult |@| jsonpCallbackNameResult) apply Ajax rightMap(_.some)
   }
 
 }
@@ -419,13 +429,42 @@ class ProtoBufDef {
     }
 
     val apiPrefixResult = Option(apiPrefix) match {
-      case None => none[String].successNel[String]
       case Some(s) if StringUtils.isNotBlank(s) => s.some.successNel[String]
+      case None => none[String].successNel
     }
 
-    for {
-      protobufRoot <- rootResult
-      protobufApiPrefix <- apiPrefixResult
-    } yield (ProtoBuf(protobufRoot, protobufApiPrefix).some)
+    (rootResult |@| apiPrefixResult) apply ProtoBuf rightMap(_.some)
+  }
+}
+
+// project.yaml -> messagepack
+class MessagepackDef {
+  // messagepack
+  @BeanProperty var root: String = null
+  @BeanProperty var mode: String = null
+
+  def toValue(projectRoot: Path): ValidationNel[String, Option[Messagepack]] = {
+    root match {
+      case null => message"validation.need.element${"root"}${"messagepack"}".failureNel[Option[Messagepack]]
+      case s if StringUtils.isBlank(s) => message"validation.not.blank${"messagepack.root"}".failureNel[Option[Messagepack]]
+      case _ => {
+
+        val rootPath = projectRoot / root
+        val rootPathResult = if (!rootPath.exists) {
+          message"validation.not.exists.path${rootPath}${"messagepack.root"}".failureNel[Path]
+        } else if (!rootPath.isDirectory) {
+          message"validation.not.directory${rootPath}${"messagepack.root"}".failureNel[Path]
+        } else {
+          rootPath.successNel
+        }
+
+        val modeResult = Option(mode) match {
+          case Some(s) => s.successNel[String]
+          case None => "json".successNel[String]
+        }
+
+        (rootPathResult |@| modeResult) apply Messagepack rightMap(_.some)
+      }
+    }
   }
 }
