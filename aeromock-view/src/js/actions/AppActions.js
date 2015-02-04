@@ -1,12 +1,17 @@
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var AppConstants = require('../constants/AppConstants');
+var apiContexts = require('../api/contexts');
+var xhrErrorHandler = require('../utils/xhrErrorHandler');
 
 var AppActions = {
 
     fetch: function () {
-        AppDispatcher.dispatch({
-            actionType: AppConstants.FETCH
-        });
+        apiContexts.fetch().then((resp) => {
+            AppDispatcher.dispatch({
+                actionType: AppConstants.FETCH,
+                contexts: resp.contexts
+            });
+        }, xhrErrorHandler);
     }
 
 };

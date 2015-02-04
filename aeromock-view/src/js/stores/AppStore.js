@@ -1,5 +1,3 @@
-var $ = require('jquery');
-var Promise = require('es6-promise').Promise;
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 var AppDispatcher = require('../dispatcher/AppDispatcher');
@@ -9,26 +7,6 @@ var CHANGE_EVENT = 'change';
 var API_FETCH = '/api/contexts';
 
 var _contexts = [];
-
-function fetchContexts() {
-    return new Promise(function (resolve, reject) {
-        $.ajax({
-            url: API_FETCH,
-            type: 'get',
-            success: function (resp) {
-                console.log(resp);
-                resolve(resp);
-            },
-            error: function (xhr) {
-                reject(xhr);
-            }
-        });
-    });
-}
-
-function xhrErrorHandler(xhr) {
-    console.log('onError:', xhr);
-}
 
 var AppStore = assign({}, EventEmitter.prototype, {
 
@@ -59,10 +37,8 @@ var AppStore = assign({}, EventEmitter.prototype, {
 AppDispatcher.register(function (action) {
     switch (action.actionType) {
         case AppConstants.FETCH:
-            fetchContexts().then(function (resp) {
-                _contexts = resp.contexts;
-                AppStore.emitChange();
-            }, xhrErrorHandler);
+            _contexts = action.contexts;
+            AppStore.emitChange();
             break;
     }
 
