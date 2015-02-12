@@ -2,6 +2,8 @@
 
 var React = require('react');
 var ReactPropTypes = React.PropTypes;
+var Directory = require('../components/Directory');
+var File = require('../components/File');
 
 var Contexts = React.createClass({
 
@@ -15,14 +17,12 @@ var Contexts = React.createClass({
 
         return (
             <div>
-                <p>[domain] {this.props.domain}</p>
-                <div>
-                    <p>[directories]</p>
-                    <div>{this.props.directories}</div>
-                </div>
-                <div>
-                    <p>[files]</p>
-                    <div>{this.props.files}</div>
+                <p className="am-domainName">{this.props.domain}</p>
+                <div className="am-childFiles">
+                    <Directory directories={this.props.directories} />
+                    <File
+                        files={this.props.files}
+                        domain={this.props.domain} />
                 </div>
             </div>
         );

@@ -1,0 +1,26 @@
+// @file filetree.styl
+
+.am-context
+  border-radius 8px
+  border solid 2px #aaa
+
+.am-domainName
+  font-size 1.5em
+  font-weigth bold
+
+.am-childFiles
+  padding 0 0 0 30px
+
+.am-tree-directory
+  &::before
+    content 'D'
+    margin 0 4px
+    color red
+
+.am-tree-file
+  &::before
+    content 'T'
+    margin 0 4px
+    color blue
+  &.--hasOtherTemplate
+    background-color rgba(5, 1, 5, 0.7)

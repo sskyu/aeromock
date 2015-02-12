@@ -35,13 +35,19 @@ module.exports = {
   },
 
   stylus: {
-    src: src + '/stylus/**',
+    src: src + '/stylus/**/!(_)*',
     dest: dest + '/css/',
     output: 'app.css',
     autoprefixer: {
       browsers: ['last 2 versions']
     },
     minify: false
+  },
+
+  watch: {
+    js: src + '/js/**',
+    stylus: src + '/stylus/**',
+    www: src + '/www/**'
   },
 
   copy: {

@@ -44,7 +44,7 @@ var App = React.createClass({
         });
 
         return (
-            <ul>{contexts}</ul>
+            <ul className="am-context">{contexts}</ul>
         );
     },
 
